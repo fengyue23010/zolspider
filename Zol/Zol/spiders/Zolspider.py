@@ -9,7 +9,7 @@ class ZolspiderSpider(scrapy.Spider):
     part_url='http://detail.zol.com.cn'
     def parse(self, response):
 
-        pplist=response.xpath(".//div[@class='brand-hot brand-list']/a/@href").extract()
+        pplist=response.xpath(".//div[@class='brand-list']/a/@href").extract()
         for ppl in pplist:
             ppl=ZolspiderSpider.part_url+ppl
             yield scrapy.Request(
@@ -20,10 +20,10 @@ class ZolspiderSpider(scrapy.Spider):
 
     def parse_phone_list(self,response):
         phone_list_url=response.meta["item"]
-
+        print(phone_list_url)
         for list in phone_list_url:
             item={}
-            phone_li_list=response.xpath(".//ul[@id='J_PicMode']/li")
+            phone_li_list=response.xpath(".//ul[@id='J_PicMode']/li[starts-with(@data-follow-id,'p')]")
             for phone_li in phone_li_list:
                 item["phone_name"]=phone_li.xpath("./h3/a/text()").extract_first()
                 item["phone_url"]=phone_li.xpath("./a/@href").extract_first()
