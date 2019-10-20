@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
-
+import requests
 
 class ZolspiderSpider(scrapy.Spider):
     name = 'Zolspider'
@@ -20,11 +20,11 @@ class ZolspiderSpider(scrapy.Spider):
 
     def parse_phone_list(self,response):
         phone_list_url=response.meta["item"]
-        print("*"*60)
-        print(phone_list_url)
-        # item={}
-        # phone_li_list=response.xpath(".//ul[@id='J_PicMode']/li")
-        # for phone_li in phone_li_list:
-        #     item["phone_name"]=phone_li.xpath("./h3/a/text()").extract_first()
-        #     item["phone_url"]=phone_li.xpath("./a/@href").extract_first()
-        # print (item)
+
+        for list in phone_list_url:
+            item={}
+            phone_li_list=response.xpath(".//ul[@id='J_PicMode']/li")
+            for phone_li in phone_li_list:
+                item["phone_name"]=phone_li.xpath("./h3/a/text()").extract_first()
+                item["phone_url"]=phone_li.xpath("./a/@href").extract_first()
+                print (item)
