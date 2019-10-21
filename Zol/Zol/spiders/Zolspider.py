@@ -26,19 +26,31 @@ class ZolspiderSpider(scrapy.Spider):
 
         phone_li_list=response.xpath(".//ul[@id='J_PicMode']/li[starts-with(@data-follow-id,'p')]")
         for phone_li in phone_li_list:
-            item["phone_name"]=phone_li.xpath("./h3/a/text()").extract_first()
-            item["phone_url"]=ZolspiderSpider.part_url+"/"+str((int((phone_li.xpath("./a/@href").extract_first()[17:24])[0:4])+1))+"/"+phone_li.xpath("./a/@href").extract_first()[17:24]+"/param.shtml"
+            item["phone_name"]=phone_li.xpath("./h3/a/text()").extract_first().strip()
+            # print(len(phone_li.xpath("./a[@class='pic']/@href").extract_first()))
+            # print(phone_li.xpath("./a[@class='pic']/@href").extract_first())
+            if (len(phone_li.xpath("./a[@class='pic']/@href").extract_first())==30) :
+                item["phone_url"]= ZolspiderSpider.part_url+"/"+str((int(phone_li.xpath("./a[@class='pic']/@href").extract_first()[17:21])+1))+"/"+phone_li.xpath("./a[@class='pic']/@href").extract_first()[17:24]+"/param.shtml"
+            elif ((len(phone_li.xpath("./a[@class='pic']/@href").extract_first())==29)):
+                item["phone_url"] = ZolspiderSpider.part_url + "/" + str((int(phone_li.xpath("./a[@class='pic']/@href").extract_first()[17:20]) + 1)) + "/" + phone_li.xpath("./a[@class='pic']/@href").extract_first()[17:23] + "/param.shtml"
+            else:
+                item["phone_url"] = ZolspiderSpider.part_url + "/" + str((int(phone_li.xpath("./a[@class='pic']/@href").extract_first()[17:19]) + 1)) + "/" + phone_li.xpath("./a[@class='pic']/@href").extract_first()[17:22] + "/param.shtml"
+            # print (phone_li.xpath("./h3/a/text()").extract_first())
+            # print (phone_li.xpath("./a[@class='pic']/@href").extract_first())
+            # print(item["phone_name"])
+            # print (item["phone_url"])
             yield scrapy.Request(
                 item["phone_url"],
                 callback=self.parse_phone_content,
                 meta={"item":deepcopy(item)}
                 )
-            next_page=phone_li.xpath(".//div[@class='pagebar']/a[@class='next']/@href")
-						if next_page is not None:
-							 yield scrapy.Request(
-                item["next_page"],
-                callback=self.parse_phone_list,
-                meta={"item":deepcopy(item)}
+            item["next_page"]=response.xpath(".//div[@class='pagebar']/a[@class='next' or @class='historyStart']/@href").extract_first()
+            if item["next_page"] is not None:
+                item["next_page"]=ZolspiderSpider.part_url+item["next_page"]
+                yield scrapy.Request(
+                    item["next_page"],
+                    callback=self.parse_phone_list,
+                    meta={"item":deepcopy(item)}
                 )
     def parse_phone_content(self,response):
         item = deepcopy(response.meta["item"])
